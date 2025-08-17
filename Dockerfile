@@ -1,16 +1,16 @@
 # Multi-stage Dockerfile to cross-compile spotifyd for ARMv7 (Raspberry Pi 2B)
-FROM rust:1.89-bookworm as builder
-
-# Add ARMv7 target for cross-compilation
-RUN rustup target add armv7-unknown-linux-gnueabihf
+FROM rust:1.89-bookworm AS builder
 
 # Install cross-compilation toolchain and dependencies
-RUN apt-get update && apt-get install -y \
+
+RUN dpkg --add-architecture armhf && \
+    apt-get update && apt-get install -y \
     pkg-config \
     build-essential \
     curl \
     git \
     gcc-arm-linux-gnueabihf \
+    libc6-armhf-cross \
     libc6-dev-armhf-cross \
     cmake \
     clang \
@@ -28,6 +28,9 @@ RUN dpkg --add-architecture armhf && \
     portaudio19-dev:armhf \
     && rm -rf /var/lib/apt/lists/*
 
+# Add ARMv7 target for cross-compilation
+RUN rustup target add armv7-unknown-linux-gnueabihf
+
 # Set environment variables for cross-compilation
 ENV CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER=arm-linux-gnueabihf-gcc
 ENV CC_armv7_unknown_linux_gnueabihf=arm-linux-gnueabihf-gcc
@@ -39,19 +42,19 @@ ENV PKG_CONFIG_ALLOW_CROSS=1
 # Set working directory
 WORKDIR /build
 
-# Clone the latest spotifyd repository
-RUN git clone https://github.com/Spotifyd/spotifyd.git . 
+# Copy sources + build files
+COPY . .
 
 # Build for ARMv7 target with default features (ALSA backend)
-RUN cargo build --target armv7-unknown-linux-gnueabihf --release --locked
+RUN cargo build --target armv7-unknown-linux-gnueabihf --release
 
 # Create output stage to extract the binary
-FROM scratch as output
+FROM scratch AS output
 COPY --from=builder /build/target/armv7-unknown-linux-gnueabihf/release/spotifyd /spotifyd
 ENTRYPOINT ["/spotifyd"]
 
 # Optional: Create a minimal runtime image for testing
-FROM debian:bookworm-slim as runtime
+FROM debian:bookworm-slim AS runtime
 
 # Install runtime dependencies
 RUN apt-get update && apt-get install -y \

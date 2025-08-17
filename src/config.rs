@@ -481,7 +481,7 @@ impl CliConfig {
             }
         };
 
-        let toml_de = toml::Deserializer::new(&content);
+        let toml_de = toml::Deserializer::parse(&content);
         let config_content: FileConfig = serde_ignored::deserialize(toml_de, |path| {
             if let Some(problem) = get_known_config_problem(&path) {
                 match problem {

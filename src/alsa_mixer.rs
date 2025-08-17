@@ -36,14 +36,13 @@ impl AlsaMixer {
 }
 
 impl Mixer for AlsaMixer {
-    fn open(_: MixerConfig) -> AlsaMixer {
-        AlsaMixer {
+    fn open(_: MixerConfig) -> Result<Self, librespot_core::Error> {
+        Ok(AlsaMixer {
             device: "default".to_string(),
             mixer: "Master".to_string(),
             linear_scaling: false,
-        }
+        })
     }
-
     fn volume(&self) -> u16 {
         let selem_id = alsa::mixer::SelemId::new(&self.mixer, 0);
         let mixer = alsa::mixer::Mixer::new(&self.device, false).ok();
