@@ -13,8 +13,8 @@ jobs:
     runs-on: ${{ matrix.runs_on }}
     strategy:
       matrix:
-        os: [macos, linux]
-        arch: [x86_64, aarch64, armv7]
+        os: [linux]
+        arch: [x86_64, armv7]
         rust: [stable]
         artifact_type: ['slim', 'default', 'full']  # The build strategy will build all types for each OS specified
         include:
