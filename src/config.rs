@@ -68,7 +68,7 @@ pub enum DeviceType {
     Chromebook,
     UnknownSpotify,
     CarThing,
-    Observer
+    Observer,
 }
 
 impl From<DeviceType> for LSDeviceType {
@@ -481,7 +481,7 @@ impl CliConfig {
             }
         };
 
-        let toml_de = toml::Deserializer::parse(&content);
+        let toml_de = toml::Deserializer::parse(&content)?;
         let config_content: FileConfig = serde_ignored::deserialize(toml_de, |path| {
             if let Some(problem) = get_known_config_problem(&path) {
                 match problem {
@@ -489,11 +489,9 @@ impl CliConfig {
                         warn!("The config key '{path}' is ignored, because the feature '{feature}' is missing in this build");
                     }
                     KnownConfigProblem::UsernamePassword => {
-                        warn!("The config key '{path}' is ignored, because authentication with username and password is no longer supported by Spotify. Please use `spotifyd authenticate` instead");
+                        warn!("The config key '{path}' refers to deprecated username/password authentication which has been removed");
                     }
                 }
-            } else {
-                warn!("Unknown key '{path}' in config will be ignored");
             }
         })?;
 
