@@ -18,15 +18,8 @@ jobs:
         rust: [stable]
         artifact_type: ['slim', 'default', 'full']  # The build strategy will build all types for each OS specified
         include:
-          # Runner configuration
-          - os: macos
-            arch: x86_64
-            runs_on: macos-13
-          - os: macos
-            arch: aarch64
-            runs_on: macos-14
           - os: linux
-            runs_on: ubuntu-20.04
+            runs_on: ubuntu-22.04
           # DBus configuration
           - artifact_type: slim
             dbus: ''
@@ -51,14 +44,6 @@ jobs:
           - os: linux
             artifact_type: full
             audio_backends: alsa_backend,pulseaudio_backend,rodio_backend,rodiojack_backend
-          # Audio backend configuration: macOS
-          - os: macos
-            audio_backends: portaudio_backend,rodio_backend
-        exclude:
-          - os: macos
-            artifact_type: 'full'
-          - os: macos
-            arch: armv7
     steps:
       - name: Checking out sources
         uses: actions/checkout@v4
